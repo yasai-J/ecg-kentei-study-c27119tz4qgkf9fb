@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>心電図検定3級ドリル</title>
+<meta name="description" content="心電図検定3級対策の隙間時間ドリル">
+<meta name="theme-color" content="#0d6b76">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="心電図ドリル">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;-webkit-text-size-adjust:100%}
+img{max-width:100%}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: one narrow column on ECG grid paper; home = mode list, each mode = full-screen card */
+:root{
+  --paper:#fbf6f5; --surface:#ffffff; --ink:#1c2130; --muted:#626777;
+  --grid-fine:rgba(206,84,100,.16); --grid-bold:rgba(206,84,100,.36);
+  --trace:#1c2130; --accent:#0d6b76; --accent-ink:#ffffff;
+  --ok:#1d8457; --ng:#c0392b; --line:rgba(28,33,48,.12); --hl:rgba(13,107,118,.16);
+  --f-display:"Dela Gothic One","Hiragino Sans","Yu Gothic",sans-serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#11151b; --surface:#1a1f27; --ink:#e7eaf0; --muted:#9aa1ae;
+  --grid-fine:rgba(240,120,135,.11); --grid-bold:rgba(240,120,135,.26);
+  --trace:#8fe6d6; --accent:#5cc7c4; --accent-ink:#0c1a1c;
+  --ok:#4fc489; --ng:#ff7a6b; --line:rgba(231,234,240,.12); --hl:rgba(92,199,196,.2); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#11151b; --surface:#1a1f27; --ink:#e7eaf0; --muted:#9aa1ae;
+  --grid-fine:rgba(240,120,135,.11); --grid-bold:rgba(240,120,135,.26);
+  --trace:#8fe6d6; --accent:#5cc7c4; --accent-ink:#0c1a1c;
+  --ok:#4fc489; --ng:#ff7a6b; --line:rgba(231,234,240,.12); --hl:rgba(92,199,196,.2); color-scheme:dark}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.7;
+  background-image:linear-gradient(var(--grid-fine) 1px,transparent 1px),linear-gradient(90deg,var(--grid-fine) 1px,transparent 1px);
+  background-size:8px 8px;}
+.wrap{max-width:560px;margin:0 auto;padding-block:20px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:16px}
+h1,h2{font-family:var(--f-display);font-weight:400;letter-spacing:.02em;text-wrap:balance;margin:0}
+h1{font-size:1.75rem;line-height:1.3}
+h2{font-size:1.2rem}
+.eyebrow{font-size:.75rem;letter-spacing:.12em;color:var(--muted);font-weight:700}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stat{display:flex;flex-direction:column;gap:2px}
+.stat b{font-family:var(--f-mono);font-size:1.4rem;font-weight:500}
+.stat span{font-size:.75rem;color:var(--muted)}
+.modes{display:flex;flex-direction:column;gap:10px}
+.mode{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;text-align:left;width:100%;
+  background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;color:inherit;font:inherit;cursor:pointer}
+.mode:hover{border-color:var(--accent)}
+.mode:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mode .ic{width:44px;height:44px;border-radius:8px;background:var(--paper);display:grid;place-items:center}
+.mode .ic svg{width:30px;height:30px;stroke:var(--accent);fill:none;stroke-width:2}
+.mode strong{display:block;font-size:1rem}
+.mode small{color:var(--muted);font-size:.8rem;line-height:1.5;display:block}
+.mode .count{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.back{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 14px;color:var(--ink);font:inherit;font-size:.85rem;cursor:pointer}
+.progress{height:4px;background:var(--line);border-radius:2px;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.strip{width:100%;display:block;border-radius:6px;border:1px solid var(--grid-bold)}
+.stripmeta{display:flex;justify-content:space-between;font-family:var(--f-mono);font-size:.7rem;color:var(--muted)}
+.q{font-size:1.05rem;font-weight:700;line-height:1.6}
+.opts{display:flex;flex-direction:column;gap:8px}
+.opt{text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:12px 14px;font:inherit;color:inherit;cursor:pointer;line-height:1.5}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,var(--surface))}
+.opt.ng{border-color:var(--ng);background:color-mix(in srgb,var(--ng) 10%,var(--surface))}
+.opt:disabled{cursor:default}
+.explain{border-left:3px solid var(--accent);padding:4px 0 4px 12px;font-size:.92rem}
+.explain .verdict{font-weight:700}
+.explain .verdict.ok{color:var(--ok)} .explain .verdict.ng{color:var(--ng)}
+.explain ul{margin:6px 0 0;padding-left:1.2em}
+.btn{background:var(--accent);color:var(--accent-ink);border:none;border-radius:8px;padding:13px;font:inherit;font-weight:700;cursor:pointer;width:100%}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.card{min-height:220px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:10px;cursor:pointer;user-select:none}
+.card .face{font-size:1.15rem;font-weight:700;line-height:1.6}
+.card .back-face{font-size:1rem;line-height:1.7;white-space:pre-line}
+.card .hint{font-size:.75rem;color:var(--muted)}
+.lib{display:flex;flex-direction:column;gap:12px}
+.lib details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.lib summary{cursor:pointer;font-weight:700;display:flex;justify-content:space-between;gap:8px;list-style:none}
+.lib summary::-webkit-details-marker{display:none}
+.lib summary .tag{font-size:.72rem;color:var(--muted);font-weight:500}
+.lib details[open] summary{margin-bottom:10px}
+.lib ul{margin:8px 0 0;padding-left:1.2em;font-size:.92rem}
+.score{font-family:var(--f-mono);font-size:3rem;line-height:1}
+.note{font-size:.8rem;color:var(--muted);line-height:1.6}
+label{font-size:.85rem;font-weight:700;display:block;margin-bottom:4px}
+textarea,input[type=text]{width:100%;font:inherit;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+.mylist{display:flex;flex-direction:column;gap:6px;font-size:.88rem}
+.mylist div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.mylist button{background:none;border:none;color:var(--ng);font:inherit;font-size:.8rem;cursor:pointer;flex:none}
+.toast{font-size:.85rem;color:var(--ok)}
+.mode.start{border:1.5px solid var(--accent)}
+.mode .num{font-family:var(--f-mono);font-size:1rem;color:var(--accent)}
+.mode .done{color:var(--ok);font-weight:700;font-size:.8rem}
+.lbody{font-size:.95rem;line-height:1.85}
+.lbody ul,.lbody ol{margin:8px 0;padding-left:1.4em;display:flex;flex-direction:column;gap:4px}
+.lbody b{color:var(--accent)}
+.figbox svg{width:100%;height:auto;display:block;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.figbox .h-wall{fill:var(--paper);stroke:var(--ink);stroke-width:2}
+.figbox .h-div{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 4;fill:none}
+.figbox .h-path{stroke:var(--accent);stroke-width:3.5;fill:none;stroke-linecap:round}
+.figbox .h-node{fill:var(--accent)}
+.figbox .h-txt{fill:var(--ink);font-family:var(--f-body);font-size:12px;font-weight:700}
+.figbox .h-room{fill:var(--muted);font-family:var(--f-body);font-size:12px}
+.lnav{display:flex;gap:8px}.lnav>*{flex:1}
+.btn:disabled{opacity:.4;cursor:default}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+
+<!-- HOME -->
+<section id="v-home" style="display:flex;flex-direction:column;gap:16px">
+  <div>
+    <div class="eyebrow">ECG 3RD GRADE · 隙間時間ドリル</div>
+    <h1>心電図検定3級ドリル</h1>
+  </div>
+  <canvas id="heroStrip" class="strip" aria-label="正常洞調律の心電図波形" role="img"></canvas>
+  <div class="panel stats">
+    <div class="stat"><b id="sToday">0</b><span>今日解いた問題</span></div>
+    <div class="stat"><b id="sRate">–</b><span>通算正答率</span></div>
+    <div class="stat"><b id="sWeak">0</b><span>苦手な問題</span></div>
+  </div>
+  <div class="modes">
+    <button class="mode start" data-go="lessons"><span class="ic"><svg viewBox="0 0 30 30"><path d="M4 22c4-1 7-1 11 2 4-3 7-3 11-2V7c-4-1-7-1-11 2-4-3-7-3-11-2z"/><path d="M15 9v15"/></svg></span><span><strong>超基礎レッスン</strong><small>まずはここから。心電図ってなに？から判読の手順まで</small></span><span class="count" id="cLes"></span></button>
+    <button class="mode" data-go="base"><span class="ic"><svg viewBox="0 0 30 30"><circle cx="15" cy="15" r="11"/><path d="M11 12a4 4 0 1 1 5 4v2M15 22v1"/></svg></span><span><strong>基礎クイズ</strong><small>波の意味・マスの読み方・伝導系。5問ずつ</small></span><span class="count" id="cBase"></span></button>
+    <button class="mode" data-go="wave"><span class="ic"><svg viewBox="0 0 30 30"><path d="M2 17h7l2-4 2 8 3-16 3 12h9"/></svg></span><span><strong>波形クイズ</strong><small>毎回ちがう波形を描画。5問で約2分</small></span><span class="count" id="cWave"></span></button>
+    <button class="mode" data-go="know"><span class="ic"><svg viewBox="0 0 30 30"><rect x="5" y="4" width="20" height="22" rx="2"/><path d="M10 11h10M10 16h10M10 21h6"/></svg></span><span><strong>知識クイズ</strong><small>計算・誘導・電解質・対応。5問ずつ</small></span><span class="count" id="cKnow"></span></button>
+    <button class="mode" data-go="weak"><span class="ic"><svg viewBox="0 0 30 30"><path d="M15 4v14M15 23v2"/><circle cx="15" cy="15" r="12"/></svg></span><span><strong>苦手だけ復習</strong><small>まちがえた問題を優先して出題</small></span><span class="count" id="cWeak"></span></button>
+    <button class="mode" data-go="cards"><span class="ic"><svg viewBox="0 0 30 30"><rect x="4" y="8" width="18" height="14" rx="2"/><path d="M8 5h16a2 2 0 0 1 2 2v12"/></svg></span><span><strong>暗記カード</strong><small>タップでめくる。通勤・休憩向け</small></span><span class="count" id="cCards"></span></button>
+    <button class="mode" data-go="lib"><span class="ic"><svg viewBox="0 0 30 30"><path d="M5 5h8a3 3 0 0 1 3 3v17a2 2 0 0 0-2-2H5zM25 5h-8a3 3 0 0 0-1 1"/><path d="M25 5v18h-9"/></svg></span><span><strong>波形図鑑</strong><small>不整脈ごとの見分け方まとめ</small></span><span class="count" id="cLib"></span></button>
+    <button class="mode" data-go="my"><span class="ic"><svg viewBox="0 0 30 30"><path d="M15 6v18M6 15h18"/></svg></span><span><strong>自分のカードを追加</strong><small>手持ちの本で覚えたいことをメモ</small></span><span class="count" id="cMy"></span></button>
+  </div>
+  <p class="note">問題と解説はこのアプリ用に作成したオリジナルです。学習の記録はこの端末のブラウザにだけ保存されます。数値や基準は、お手持ちの公式テキストで最終確認してください。</p>
+</section>
+
+<!-- LESSON INDEX -->
+<section id="v-lessons" hidden style="display:flex;flex-direction:column;gap:14px">
+  <div class="topbar"><button class="back" data-home>← ホーム</button><span class="eyebrow">超基礎レッスン</span></div>
+  <p class="note" style="margin:0">1レッスン1〜2分。上から順に進めると、波形クイズが解けるところまで届きます。各レッスンの最後に確認問題が1問あります。</p>
+  <div class="modes" id="lesList"></div>
+</section>
+
+<!-- LESSON -->
+<section id="v-lesson" hidden style="display:flex;flex-direction:column;gap:14px">
+  <div class="topbar"><button class="back" id="lesBack">← 一覧</button><span class="mono" id="lPos"></span></div>
+  <div class="progress"><i id="lBar" style="width:0"></i></div>
+  <div><div class="eyebrow" id="lEyebrow"></div><h2 id="lTitle"></h2></div>
+  <div class="figbox" id="lFig"></div>
+  <div class="lbody" id="lBody"></div>
+  <div class="panel" style="display:flex;flex-direction:column;gap:10px">
+    <div class="eyebrow">確認問題</div>
+    <div class="q" id="lQ"></div>
+    <div class="opts" id="lOpts"></div>
+    <div class="explain" id="lExp" hidden></div>
+  </div>
+  <div class="lnav"><button class="btn ghost" id="lPrev">前へ</button><button class="btn" id="lNext">次へ</button></div>
+</section>
+
+<!-- QUIZ -->
+<section id="v-quiz" hidden style="display:flex;flex-direction:column;gap:14px">
+  <div class="topbar"><button class="back" data-home>← ホーム</button><span class="mono" id="qCount">1 / 5</span></div>
+  <div class="progress"><i id="qBar" style="width:0"></i></div>
+  <div id="qStripBox" hidden style="display:flex;flex-direction:column;gap:4px">
+    <canvas id="qStrip" class="strip" role="img" aria-label="問題の心電図波形"></canvas>
+    <div class="stripmeta"><span>II誘導風 · 25 mm/s · 10 mm/mV</span><button class="back" id="redraw" style="padding:2px 10px;font-size:.7rem">別の波形</button></div>
+  </div>
+  <div class="q" id="qText"></div>
+  <div class="opts" id="qOpts"></div>
+  <div class="explain" id="qExplain" hidden></div>
+  <button class="btn" id="qNext" hidden>次へ</button>
+</section>
+
+<!-- RESULT -->
+<section id="v-result" hidden style="display:flex;flex-direction:column;gap:16px">
+  <div class="eyebrow">RESULT</div>
+  <div class="panel" style="display:flex;flex-direction:column;gap:6px">
+    <div class="score"><span id="rScore">0</span><small style="font-size:1.2rem"> / <span id="rTotal">5</span></small></div>
+    <div id="rMsg"></div>
+  </div>
+  <div class="row"><button class="btn" id="rAgain">もう5問</button><button class="btn ghost" data-home>ホーム</button></div>
+</section>
+
+<!-- CARDS -->
+<section id="v-cards" hidden style="display:flex;flex-direction:column;gap:14px">
+  <div class="topbar"><button class="back" data-home>← ホーム</button><span class="mono" id="cPos"></span></div>
+  <div class="panel card" id="card" tabindex="0" role="button" aria-label="カードをめくる">
+    <div class="eyebrow" id="cTag"></div>
+    <div class="face" id="cFront"></div>
+    <div class="back-face" id="cBack" hidden></div>
+    <div class="hint" id="cHint">タップで答え</div>
+  </div>
+  <div class="row"><button class="btn ghost" id="cAgain">もう一度</button><button class="btn" id="cGot">覚えた</button></div>
+</section>
+
+<!-- LIBRARY -->
+<section id="v-lib" hidden style="display:flex;flex-direction:column;gap:14px">
+  <div class="topbar"><button class="back" data-home>← ホーム</button><span class="eyebrow">波形図鑑</span></div>
+  <div class="lib" id="libList"></div>
+</section>
+
+<!-- MY CARDS -->
+<section id="v-my" hidden style="display:flex;flex-direction:column;gap:14px">
+  <div class="topbar"><button class="back" data-home>← ホーム</button><span class="eyebrow">自分のカード</span></div>
+  <form class="panel" id="myForm" style="display:flex;flex-direction:column;gap:10px">
+    <div><label for="myFront">表（問い）</label><input type="text" id="myFront" placeholder="例：1度房室ブロックのPR間隔は？" required></div>
+    <div><label for="myBack">裏（答え）</label><textarea id="myBack" rows="3" placeholder="例：0.20秒を超えて一定" required></textarea></div>
+    <button class="btn" type="submit">カードを追加</button>
+    <span class="toast" id="myToast" hidden>追加しました。暗記カードに混ざって出ます。</span>
+  </form>
+  <div class="panel"><div class="eyebrow" style="margin-bottom:8px">追加したカード</div><div class="mylist" id="myList"></div></div>
+</section>
+
+</div>
+
+<script>
+/* ===================== storage ===================== */
+const KEY="ecg3drill.v1";
+let S={q:{},days:{},my:[],cards:{},lessons:{}};
+try{const raw=localStorage.getItem(KEY); if(raw) S=Object.assign(S,JSON.parse(raw));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();};
+
+/* ===================== ECG synthesis ===================== */
+const g=(t,mu,s,a)=>a*Math.exp(-((t-mu)**2)/(2*s*s));
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function beatV(t,b){
+  let v=0; const qs=b.t0+(b.pr||0.16);
+  if(b.p!==false) v+=g(t,b.t0,0.025,b.pAmp??0.15);
+  if(b.drop) return v;
+  if(b.qrs==="wide"){
+    v+=g(t,qs+0.06,0.03,1.3)+g(t,qs+0.13,0.03,-0.45)+g(t,qs+0.33,0.06,-0.45);
+  }else{
+    if(b.delta) v+=g(t,qs+0.015,0.022,0.35);
+    v+=g(t,qs+0.02,0.008,-0.1)+g(t,qs+0.045,0.011,b.r??1.2)+g(t,qs+0.07,0.011,-0.3);
+    if(b.st) v+=g(t,qs+0.16,0.055,b.st);
+    if(b.peakT) v+=g(t,qs+0.27,0.028,0.9);
+    else v+=g(t,qs+0.30,0.045,b.tAmp??0.3);
+    if(b.u) v+=g(t,qs+0.48,0.035,b.u);
+  }
+  return v;
+}
+function regular(hr,opt={},dur=6.4){const rr=60/hr,out=[];for(let t=rnd(0.05,0.4);t<dur;t+=rr*rnd(0.98,1.02))out.push(Object.assign({t0:t},opt));return out;}
+
+const RHYTHMS=[
+ {id:"nsr",name:"正常洞調律",tag:"基本",gen:()=>({beats:regular(rnd(65,85))}),
+  pts:["P波→QRS→T波が規則正しく並ぶ","心拍数 60〜100/分、RR間隔一定","PR 0.12〜0.20秒、QRS 0.10秒以下"],conf:["brady","tachy","avb1"]},
+ {id:"tachy",name:"洞性頻脈",tag:"基本",gen:()=>({beats:regular(rnd(115,135))}),
+  pts:["波形の形は正常で、心拍数が100/分を超える","RRが大きいマス3つより短い","発熱・脱水・痛み・貧血などが原因になる"],conf:["nsr","psvt","afl"]},
+ {id:"brady",name:"洞性徐脈",tag:"基本",gen:()=>({beats:regular(rnd(40,48))}),
+  pts:["波形の形は正常で、心拍数が少ない","RRが大きいマス6つ以上","迷走神経緊張、β遮断薬、甲状腺機能低下など"],conf:["nsr","avb3","avb1"]},
+ {id:"af",name:"心房細動（AF）",tag:"上室性",gen:()=>{const out=[];let t=rnd(0.05,0.3);while(t<6.4){out.push({t0:t,p:false,pr:0});t+=rnd(0.42,1.05);}
+   const ph=[rnd(0,6),rnd(0,6),rnd(0,6)];return{beats:out,base:t=>0.045*Math.sin(2*Math.PI*6.1*t+ph[0])+0.035*Math.sin(2*Math.PI*7.7*t+ph[1])+0.025*Math.sin(2*Math.PI*9.3*t+ph[2])};},
+  pts:["P波がなく、基線が細かく揺れる（f波）","RR間隔がまったく不規則（絶対不整）","心房内に血栓ができやすく、脳梗塞予防に抗凝固療法"],conf:["afl","pac","nsr"]},
+ {id:"afl",name:"心房粗動（AFL）",tag:"上室性",gen:()=>{const out=[];const ratio=Math.random()<.5?4:2,start=rnd(0,.2);for(let t=start+0.12;t<6.4;t+=0.2*ratio)out.push({t0:t,p:false,pr:0});
+   return{beats:out,base:t=>{const x=((t-start)/0.2)%1;return x<0.75? -0.22*(1-x/0.75)+0.05 : -0.22*((x-0.75)/0.25)+0.05;}};},
+  pts:["ノコギリの歯のような規則的な F波","F波は約300/分。II・III・aVFで見やすい","4:1 や 2:1 など一定の比で心室に伝わる"],conf:["af","tachy","psvt"]},
+ {id:"psvt",name:"発作性上室頻拍（PSVT）",tag:"上室性",gen:()=>({beats:regular(rnd(165,190),{p:false})}),
+  pts:["幅の狭いQRSが規則正しく150〜250/分","P波はQRSやT波に埋もれて見えにくい","迷走神経刺激やATP（アデノシン）で停止することが多い"],conf:["tachy","afl","vt"]},
+ {id:"pac",name:"心房期外収縮（PAC）",tag:"上室性",gen:()=>{const hr=rnd(68,78),rr=60/hr,out=[];let t=rnd(.1,.3),i=0;const k=2+Math.floor(Math.random()*2);
+   while(t<6.4){if(i===k||i===k+4){out.push({t0:t-rr*0.35,pAmp:0.09});t+=rr*0.95;}else{out.push({t0:t});t+=rr;}i++;}return{beats:out};},
+  pts:["予定より早く、形の違うP波が出る","続くQRSは幅が狭く、ふだんと同じ形","休止は代償性でない（前後RRが基本RRの2倍未満）"],conf:["pvc","af","nsr"]},
+ {id:"pvc",name:"心室期外収縮（PVC）",tag:"心室性",gen:()=>{const hr=rnd(68,80),rr=60/hr,out=[];let t=rnd(.1,.3),i=0;const k=2+Math.floor(Math.random()*2);
+   while(t<6.4){if(i===k||i===k+4){out.push({t0:t-rr*0.4,p:false,qrs:"wide",pr:0.02});t+=rr;}else out.push({t0:t});t+=rr;i++;}
+   return{beats:out.filter((b,j)=>!(j>0&&out[j-1].qrs==="wide"&&false))};},
+  pts:["先行するP波のない、幅広く変形したQRSが早く出る","T波はQRSと逆向きになりやすい","代償性休止：前後RRの和が基本RRの2倍"],conf:["pac","vt","wpw"]},
+ {id:"vt",name:"心室頻拍（VT）",tag:"心室性",gen:()=>({beats:regular(rnd(160,185),{p:false,qrs:"wide",pr:0})}),
+  pts:["幅広いQRSが規則正しく連続（PVCが3連発以上）","脈が触れなければ無脈性VT → 除細動","脈があっても血圧低下に注意。すぐに医師へ"],conf:["vf","psvt","pvc"]},
+ {id:"vf",name:"心室細動（VF）",tag:"致死性",gen:()=>{const p=[rnd(0,6),rnd(0,6)];return{beats:[],base:t=>(0.35+0.25*Math.sin(0.9*t+p[0]))*(Math.sin(2*Math.PI*4.6*t+1.8*Math.sin(1.7*t+p[1]))+0.4*Math.sin(2*Math.PI*7.1*t))};},
+  pts:["P・QRS・Tの区別がつかない不規則な波","心臓は痙攣しているだけで拍出がない＝心停止","ただちにCPRと除細動（AED）"],conf:["vt","af","afl"]},
+ {id:"avb1",name:"1度房室ブロック",tag:"房室ブロック",gen:()=>({beats:regular(rnd(62,75),{pr:rnd(0.30,0.36)})}),
+  pts:["PR間隔が0.20秒を超えて延長し、一定","QRSの脱落はない","多くは経過観察"],conf:["nsr","wenck","mob2"]},
+ {id:"wenck",name:"2度房室ブロック（ウェンケバッハ型）",tag:"房室ブロック",gen:()=>{const pp=60/rnd(75,85),prs=[0.16,0.25,0.31,null],out=[];let i=Math.floor(Math.random()*4);
+   for(let t=rnd(.05,.3);t<6.4;t+=pp,i++){const pr=prs[i%4];out.push(pr===null?{t0:t,drop:true}:{t0:t,pr});}return{beats:out};},
+  pts:["PR間隔が1拍ごとに延びていき、QRSが1つ抜ける","抜けたあとPRはまた短く戻る（周期的）","房室結節レベルが多く、比較的予後良好"],conf:["mob2","avb1","avb3"]},
+ {id:"mob2",name:"2度房室ブロック（モビッツII型）",tag:"房室ブロック",gen:()=>{const pp=60/rnd(75,85),out=[];let i=Math.floor(Math.random()*4);
+   for(let t=rnd(.05,.3);t<6.4;t+=pp,i++)out.push(i%4===3?{t0:t,drop:true}:{t0:t,pr:0.18});return{beats:out};},
+  pts:["PR間隔は一定のまま、突然QRSが脱落","ヒス束以下の障害が多く、3度へ進行しやすい","ペースメーカーの適応になりやすい"],conf:["wenck","avb3","avb1"]},
+ {id:"avb3",name:"3度（完全）房室ブロック",tag:"房室ブロック",gen:()=>{const out=[];const pp=60/rnd(85,95),vv=60/rnd(36,44);
+   for(let t=rnd(0,.3);t<6.4;t+=pp)out.push({t0:t,drop:true});
+   for(let t=rnd(.2,.8);t<6.4;t+=vv)out.push({t0:t,p:false,pr:0,qrs:Math.random()<0?"wide":"wide"});return{beats:out};},
+  pts:["P波とQRSがそれぞれのリズムでバラバラ（房室解離）","PP間隔もRR間隔もそれぞれ一定、心室は30〜40/分前後","アダムス・ストークス発作の危険。ペーシングの適応"],conf:["mob2","brady","wenck"]},
+ {id:"stemi",name:"ST上昇（急性心筋梗塞を疑う）",tag:"虚血",gen:()=>({beats:regular(rnd(80,95),{st:rnd(0.35,0.45),tAmp:0.25})}),
+  pts:["J点からSTが基線より持ち上がる","上昇した誘導の位置で梗塞部位を推定（II・III・aVF＝下壁など）","胸痛＋ST上昇は緊急。12誘導をすぐ医師へ"],conf:["hyperk","nsr","wpw"]},
+ {id:"hyperk",name:"高カリウム血症（テント状T波）",tag:"電解質",gen:()=>({beats:regular(rnd(65,78),{peakT:true,pAmp:0.07})}),
+  pts:["左右対称で幅が狭く、高く尖ったT波","進むとP波平低化 → QRS幅拡大 → 心停止の危険","腎不全・K製剤・ACE阻害薬などで起こる"],conf:["stemi","hypok","nsr"]},
+ {id:"hypok",name:"低カリウム血症（U波）",tag:"電解質",gen:()=>({beats:regular(rnd(65,78),{tAmp:0.1,u:0.15,st:-0.06})}),
+  pts:["T波が平低化し、その後ろにU波が目立つ","ST低下を伴うことがある","利尿薬・嘔吐・下痢などで起こり、不整脈が出やすくなる"],conf:["hyperk","nsr","avb1"]},
+ {id:"wpw",name:"WPW症候群（デルタ波）",tag:"副伝導路",gen:()=>({beats:regular(rnd(65,78),{pr:0.09,delta:true})}),
+  pts:["PR間隔が短い（0.12秒未満）","QRSの立ち上がりがなだらか＝デルタ波","副伝導路（ケント束）が原因。発作性頻拍を起こしやすい"],conf:["avb1","pvc","nsr"]},
+];
+const R=Object.fromEntries(RHYTHMS.map(r=>[r.id,r]));
+
+function css(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function drawStrip(cv,rhythmId){
+  const data=R[rhythmId].gen();
+  const W=cv.clientWidth||340, dpr=window.devicePixelRatio||1;
+  const secs=W<420?4:6, mm=W/(secs*25), H=Math.round(mm*28);
+  cv.width=W*dpr; cv.height=H*dpr; cv.style.height=H+"px";
+  const c=cv.getContext("2d"); c.scale(dpr,dpr); c.clearRect(0,0,W,H);
+  c.fillStyle=css("--surface"); c.fillRect(0,0,W,H);
+  for(let i=0;i*mm<=W;i++){c.strokeStyle=i%5?css("--grid-fine"):css("--grid-bold");c.lineWidth=i%5?0.5:1;c.beginPath();c.moveTo(i*mm,0);c.lineTo(i*mm,H);c.stroke();}
+  for(let j=0;j*mm<=H;j++){c.strokeStyle=j%5?css("--grid-fine"):css("--grid-bold");c.lineWidth=j%5?0.5:1;c.beginPath();c.moveTo(0,j*mm);c.lineTo(W,j*mm);c.stroke();}
+  const base=H*0.62, fs=250;
+  c.strokeStyle=css("--trace"); c.lineWidth=1.6; c.lineJoin="round"; c.beginPath();
+  for(let k=0;k<=secs*fs;k++){const t=k/fs;let v=(data.base?data.base(t):0)+rnd(-0.008,0.008);
+    for(const b of data.beats) if(t>b.t0-0.2&&t<b.t0+0.95) v+=beatV(t,b);
+    const x=t*25*mm, y=base-v*10*mm; k?c.lineTo(x,y):c.moveTo(x,y);}
+  c.stroke();
+}
+
+/* annotated two-beat diagram for lessons */
+function drawBeat(cv,hl){
+  const W=cv.clientWidth||340,dpr=window.devicePixelRatio||1,secs=1.6,mm=W/(secs*25),H=Math.round(mm*25);
+  cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+"px";
+  const c=cv.getContext("2d");c.scale(dpr,dpr);c.fillStyle=css("--surface");c.fillRect(0,0,W,H);
+  for(let i=0;i*mm<=W+1;i++){c.strokeStyle=i%5?css("--grid-fine"):css("--grid-bold");c.lineWidth=i%5?0.5:1;c.beginPath();c.moveTo(i*mm,0);c.lineTo(i*mm,H);c.stroke();}
+  for(let j=0;j*mm<=H+1;j++){c.strokeStyle=j%5?css("--grid-fine"):css("--grid-bold");c.lineWidth=j%5?0.5:1;c.beginPath();c.moveTo(0,j*mm);c.lineTo(W,j*mm);c.stroke();}
+  const base=15*mm,X=t=>t*25*mm,Y=v=>base-v*10*mm,beats=[{t0:0.25},{t0:1.05}];
+  const fontB="700 13px 'Zen Kaku Gothic New',sans-serif";
+  const REG={p:[.19,.31,"P波"],pr:[.19,.41,"PR間隔"],qrs:[.40,.50,"QRS"],st:[.50,.62,"ST"],t:[.61,.83,"T波"],qt:[.40,.83,"QT間隔"]};
+  if(REG[hl]){const[a,b,l]=REG[hl];c.fillStyle=css("--hl");c.fillRect(X(a),0,X(b)-X(a),H);
+    c.strokeStyle=css("--accent");c.lineWidth=1.5;c.beginPath();c.moveTo(X(a),H-6);c.lineTo(X(b),H-6);c.moveTo(X(a),H-10);c.lineTo(X(a),H-2);c.moveTo(X(b),H-10);c.lineTo(X(b),H-2);c.stroke();
+    c.fillStyle=css("--accent");c.font=fontB;c.textAlign=X(b)+60>W?"right":"left";c.fillText(l,X(b)+60>W?X(a)-4:X(b)+4,H-3);}
+  if(hl==="rr"){const a=X(.455),b=X(1.255),y=2.2*mm;c.strokeStyle=css("--accent");c.lineWidth=1.5;c.beginPath();c.moveTo(a,y);c.lineTo(b,y);c.moveTo(a,y-4);c.lineTo(a,H);c.moveTo(b,y-4);c.lineTo(b,H);c.setLineDash([3,3]);c.stroke();c.setLineDash([]);
+    c.fillStyle=css("--accent");c.font=fontB;c.textAlign="center";c.fillText("RR間隔＝大マス4つ",(a+b)/2,y+16);}
+  if(hl==="grid"){c.fillStyle=css("--hl");c.fillRect(25*mm,20*mm,5*mm,5*mm);c.strokeStyle=css("--accent");c.lineWidth=2;c.strokeRect(25*mm,20*mm,5*mm,5*mm);
+    c.fillStyle=css("--accent");c.fillRect(8*mm,22*mm,mm,mm);c.font=fontB;c.textAlign="left";c.fillText("小マス0.04秒",9*mm+4,23.4*mm);c.fillText("大マス0.2秒",30*mm+4,23.4*mm);}
+  c.strokeStyle=css("--trace");c.lineWidth=2;c.lineJoin="round";c.beginPath();
+  for(let k=0;k<=secs*400;k++){const t=k/400;let v=0;for(const b of beats)v+=beatV(t,b);k?c.lineTo(X(t),Y(v)):c.moveTo(X(t),Y(v));}c.stroke();
+  c.fillStyle=css("--muted");c.font=fontB;c.textAlign="center";
+  [["P",.25,.15,-8],["Q",.425,-.1,16],["S",.485,-.3,16],["T",.71,.3,-8]].forEach(([l,t,v,d])=>c.fillText(l,X(t),Y(v)+d));
+  c.textAlign="left";c.fillText("R",X(.455)+6,Y(1.2)+10);
+}
+const COND_SVG=`<svg viewBox="0 0 320 230" role="img" aria-label="心臓の4つの部屋と刺激伝導系">
+<path class="h-wall" d="M160 32C112 4 42 18 40 82c-2 62 66 104 128 140 58-38 120-78 116-140C280 22 208 6 160 32Z"/>
+<path class="h-div" d="M44 100H282M162 100l8 115"/>
+<text class="h-room" x="62" y="70">右心房</text><text class="h-room" x="212" y="70">左心房</text>
+<text class="h-room" x="70" y="150">右心室</text><text class="h-room" x="216" y="150">左心室</text>
+<path class="h-path" d="M98 50Q130 72 158 100" stroke-dasharray="2 7"/>
+<path class="h-path" d="M158 100L164 128M164 128L132 196M164 128L208 194M132 196l-14 4M132 196l2 12M208 194l14 2M208 194l-4 12"/>
+<circle class="h-node" cx="96" cy="48" r="8"/><circle class="h-node" cx="158" cy="100" r="7"/>
+<text class="h-txt" x="108" y="46">① 洞結節</text><text class="h-txt" x="172" y="98">② 房室結節</text>
+<text class="h-txt" x="172" y="128">③ ヒス束</text><text class="h-txt" x="52" y="212">④ 右脚</text><text class="h-txt" x="216" y="214">④ 左脚</text>
+<text class="h-room" x="118" y="226">⑤ プルキンエ線維</text></svg>`;
+
+const LESSONS=[
+ {t:"心電図ってなに？",fig:"beat:none",body:"心臓は電気の合図で動いています。その電気の流れを、皮膚に貼った電極で拾ってグラフにしたものが心電図です。<ul><li>横方向は<b>時間</b>。左から右へ進む</li><li>縦方向は<b>電気の大きさ（電位）</b>。上が＋、下が−</li><li>波のない平らな線を<b>基線</b>という</li></ul>1回の拍動ごとに、P・QRS・Tという同じ形の波がくり返されます。",
+  q:["心電図の横軸が表すものは？",["時間","電気の大きさ","血圧","心臓の大きさ"],"横は時間、縦は電位。左から右へ時間が流れます。"]},
+ {t:"心臓の部屋と電気の通り道",fig:"svg:cond",body:"心臓には4つの部屋があります。上の2つが<b>心房</b>、下の2つが<b>心室</b>。全身へ血液を送り出すのは<b>左心室</b>です。<br>電気の合図は決まった道を通ります。この道を<b>刺激伝導系</b>といいます。<ol><li><b>洞結節</b>（右心房）で電気が生まれる＝ペースメーカー</li><li>心房全体に広がり、<b>房室結節</b>でいったんゆっくりになる</li><li><b>ヒス束</b>を通る</li><li><b>右脚・左脚</b>に分かれる</li><li><b>プルキンエ線維</b>で心室全体へ一気に広がる</li></ol>",
+  q:["心臓のリズムをつくるペースメーカーはどこ？",["洞結節","房室結節","ヒス束","プルキンエ線維"],"洞結節は右心房にあり、ふつう1分間に60〜100回の電気をつくります。"]},
+ {t:"興奮と回復（脱分極・再分極）",fig:"beat:none",body:"心筋の細胞は、電気的に<b>興奮（脱分極）</b>すると縮み、<b>興奮がさめる（再分極）</b>と元に戻ります。心電図の波は、この興奮と回復が心臓の中を広がっていく様子です。<ul><li>電気が電極に<b>向かってくる</b>と上向きの波</li><li>電極から<b>遠ざかる</b>と下向きの波</li></ul>同じ心臓でも、どこから見るか（誘導）で波の向きが変わるのはこのためです。",
+  q:["電気の流れが電極に向かってくると、波はどう描かれる？",["上向き","下向き","平ら","2つに割れる"],"向かってくると上向き、遠ざかると下向き。aVRで波が下向きなのは、電気が右上から遠ざかるからです。"]},
+ {t:"P波＝心房の興奮",fig:"beat:p",body:"最初の小さく丸い山が<b>P波</b>。洞結節から出た電気で<b>心房が興奮</b>したことを表します。<ul><li>小さくて、幅は0.10秒（小マス2.5個）くらいまで</li><li>II誘導では上向き</li><li>心房が回復する波はQRSに重なって見えない</li></ul>QRSの前にP波が1つずつある＝洞結節からの正しいリズム、の目印です。",
+  q:["P波が表すのは？",["心房の興奮","心室の興奮","心室の回復","洞結節の休止"],"P＝心房。心房は筋肉が薄いので波も小さめです。"]},
+ {t:"QRS波＝心室の興奮",fig:"beat:qrs",body:"鋭くとがった大きな波が<b>QRS波</b>。<b>心室が興奮</b>したことを表します。心室は筋肉が多いので、波も大きくなります。<br>名前の付け方は決まっています。<ul><li><b>Q波</b>：最初の下向きの波</li><li><b>R波</b>：最初の上向きの波</li><li><b>S波</b>：R波のあとの下向きの波</li></ul>3つがそろわない形もありますが、まとめて「QRS」と呼びます。",
+  q:["QRS波の中で「最初の上向きの波」の名前は？",["R波","Q波","S波","T波"],"上向きはR。Rの前の下向きがQ、後の下向きがSです。"]},
+ {t:"T波＝心室の回復",fig:"beat:t",body:"QRSのあとのゆるやかな山が<b>T波</b>。興奮した心室が<b>元に戻る（再分極）</b>ところです。<ul><li>ふつうはQRSと同じ向き（II誘導なら上向き）</li><li>高く尖る → 高カリウム血症</li><li>逆向き（陰性T） → 心筋虚血など</li></ul>T波のあとに小さな<b>U波</b>が見えることもあります。",
+  q:["T波が表すのは？",["心室の再分極（回復）","心房の興奮","心室の興奮","房室結節の伝導"],"QRS＝心室の興奮、T＝心室の回復。セットで覚えましょう。"]},
+ {t:"方眼紙の読み方",fig:"beat:grid",body:"心電図用紙は、1mmの小さいマスと、太線で囲んだ5mmの大きいマスでできています。標準の記録条件（25mm/秒、10mm/mV）では<ul><li>横 小マス1つ＝<b>0.04秒</b></li><li>横 大マス1つ＝<b>0.2秒</b>、大マス5つ＝<b>1秒</b></li><li>縦 10mm（大マス2つ）＝<b>1mV</b></li></ul>「何秒？」と聞かれたら、小マスを数えて0.04をかけます。",
+  q:["小マス5個分の横幅は何秒？",["0.2秒","0.04秒","0.5秒","1秒"],"0.04秒×5＝0.2秒。これが大マス1つ分です。"]},
+ {t:"PR間隔",fig:"beat:pr",body:"<b>P波の始まりからQRS波の始まり</b>まで。電気が心房から房室結節を通って心室に届くまでの時間です。<ul><li>正常は<b>0.12〜0.20秒</b>（小マス3〜5個）</li><li>長い（0.20秒超） → 房室ブロックを考える</li><li>短い（0.12秒未満） → WPW症候群などを考える</li></ul>",
+  q:["PR間隔はどこからどこまで？",["P波の始まり〜QRS波の始まり","P波の終わり〜QRS波の終わり","QRS波の始まり〜T波の終わり","P波の頂点〜R波の頂点"],"「始まり」から「始まり」で測ります。"]},
+ {t:"QRS幅",fig:"beat:qrs",body:"QRS波の始まりから終わりまでの幅。心室全体に電気が広がるのにかかる時間です。<ul><li>正常は<b>0.10秒以下</b>（小マス2.5個まで）</li><li><b>0.12秒以上</b>は「幅の広いQRS」</li></ul>幅が広いときは、脚ブロック（伝導の遅れ）か、心室そのものから出た興奮（PVC・VT）を考えます。刺激伝導系を速く通れないぶん、ゆっくり広がるからです。",
+  q:["QRS幅が0.14秒。どう判断する？",["幅の広いQRS","正常","PR間隔が短い","判断できない"],"0.12秒以上は幅広。小マス3.5個分です。"]},
+ {t:"ST部分",fig:"beat:st",body:"<b>QRSの終わりからT波の始まり</b>までの平らな部分。心室全体が興奮しきっている時間です。<ul><li>正常は<b>基線と同じ高さ</b></li><li>持ち上がる（ST上昇） → 急性心筋梗塞を疑う</li><li>下がる（ST低下） → 心筋虚血（狭心症など）を考える</li></ul>QRSの終わりの点を<b>J点</b>と呼び、ここを目安に高さを比べます。",
+  q:["正常なST部分の高さは？",["基線と同じ","基線より高い","基線より低い","R波と同じ"],"STは基線と同じ高さが正常。ずれていたら虚血を考えます。"]},
+ {t:"QT間隔",fig:"beat:qt",body:"<b>QRSの始まりからT波の終わり</b>まで。心室が興奮してから回復するまでの全体の時間です。<ul><li>心拍数が速いと短く、遅いと長くなる</li><li>目安は、RR間隔の半分より短いこと</li><li>延びすぎると、トルサード・ド・ポアンツという危険な不整脈が起きやすい</li></ul>",
+  q:["QT間隔はどこからどこまで？",["QRSの始まり〜T波の終わり","P波の始まり〜T波の終わり","QRSの終わり〜T波の始まり","R波〜次のR波"],"QRS（興奮）からT（回復）の終わりまで。心室の仕事の全体です。"]},
+ {t:"RR間隔と心拍数",fig:"beat:rr",body:"R波の頂点から次のR波の頂点までが<b>RR間隔</b>。1拍にかかる時間です。<ul><li>心拍数＝<b>300 ÷ RR間の大マスの数</b></li><li>大マス 1つ300・2つ150・3つ100・4つ75・5つ60・6つ50</li><li>正確には 1500 ÷ 小マスの数</li></ul>正常は60〜100/分。100を超えると<b>頻脈</b>、60未満で<b>徐脈</b>です。図はRRが大マス4つなので75/分。",
+  q:["RR間隔が大マス3つ。心拍数は？",["100/分","75/分","150/分","60/分"],"300÷3＝100/分。"]},
+ {t:"誘導ってなに？",fig:null,body:"誘導は、心臓を<b>どの方向から見るか</b>のこと。カメラの位置のようなものです。<b>12誘導心電図</b>は<ul><li><b>四肢誘導 6つ</b>：I・II・III・aVR・aVL・aVF（体の正面から上下左右を見る）</li><li><b>胸部誘導 6つ</b>：V1〜V6（胸の前から水平に見る）</li></ul>病棟のモニター心電図は、P波が見やすい<b>II誘導</b>がよく使われます。3点電極は、赤＝右鎖骨下、黄＝左鎖骨下、緑＝左下胸部が基本です。",
+  q:["12誘導心電図の胸部誘導はいくつ？",["6つ","3つ","12","4つ"],"四肢誘導6＋胸部誘導6＝12誘導。"]},
+ {t:"正常洞調律の条件",fig:"beat:none",body:"ここまでの基礎がそろうと「正常」と言えます。<ol><li>P波がII誘導で上向き</li><li>P波のあとに必ずQRSが1つ続く</li><li>PR間隔0.12〜0.20秒で一定</li><li>QRS幅0.10秒以下</li><li>RR間隔が一定で、心拍数60〜100/分</li></ol>どれかが外れたら「どこが違うか」を言葉にするのが判読です。",
+  q:["正常洞調律に当てはまらないものは？",["心拍数120/分","PR間隔0.16秒","QRS幅0.08秒","P波がII誘導で上向き"],"120/分は頻脈。ほかが正常なら「洞性頻脈」です。"]},
+ {t:"判読の5ステップ",fig:null,body:"どんな波形も、同じ順番で見ればこわくありません。<ol><li><b>心拍数</b>：速い？遅い？</li><li><b>リズム</b>：RR間隔はそろっている？</li><li><b>P波</b>：ある？QRSの前に1つずつ？</li><li><b>PR間隔とQRS幅</b>：長すぎ・広すぎない？</li><li><b>ST・T</b>：上がったり下がったりしていない？</li></ol>波形クイズでも、この順番で考えるくせをつけましょう。",
+  q:["波形を見て最初に確認するのは？",["心拍数とリズム","ST部分","T波の形","U波の有無"],"まず速さとリズム。そこで大きく分類してから細かく見ます。"]},
+];
+
+const BQ=[
+ ["心電図の縦軸が表すものは？",["電気の大きさ（電位）","時間","血圧","呼吸数"],"縦は電位（mV）。横は時間です。"],
+ ["P波が表すのは？",["心房の興奮","心室の興奮","心室の再分極","房室結節の興奮"],"P＝心房、QRS＝心室の興奮、T＝心室の回復。"],
+ ["QRS波が表すのは？",["心室の興奮（脱分極）","心房の興奮","心室の回復","洞結節の興奮"],"心室は筋肉量が多いので、波も大きく鋭くなります。"],
+ ["T波が表すのは？",["心室の再分極（回復）","心房の興奮","心室の興奮","心房の回復"],"T波＝心室の興奮がさめるところ。"],
+ ["心房の再分極の波がふつう見えないのはなぜ？",["QRS波に重なって隠れるから","波が出ないから","T波と同じだから","P波に含まれるから"],"心房が回復する時期と心室が興奮する時期が重なっています。"],
+ ["洞結節がある場所は？",["右心房","左心房","右心室","心室中隔"],"右心房の上のほう（上大静脈の入口付近）にあります。"],
+ ["心房から心室へ電気を通す、正常な唯一の通り道は？",["房室結節〜ヒス束","プルキンエ線維","洞結節","右脚"],"心房と心室の間は絶縁されていて、通れるのはここだけ。別の通り道があるのがWPW症候群です。"],
+ ["房室結節で伝導がゆっくりになる意味は？",["心房が縮んで心室に血液を送る時間をつくる","心拍数を上げるため","心室を先に縮めるため","電気を強くするため"],"この遅れがPR間隔の大部分を占めます。"],
+ ["全身に血液を送り出す部屋は？",["左心室","右心室","左心房","右心房"],"右心室は肺へ、左心室は全身へ送ります。"],
+ ["QRS波で、最初の下向きの波を何という？",["Q波","R波","S波","U波"],"R波より前の下向きがQ、後ろの下向きがS。"],
+ ["QRS波で、R波のあとの下向きの波は？",["S波","Q波","T波","P波"],"順番にQ→R→S。"],
+ ["基線とはどこのこと？",["波のない平らな線（T波の終わり〜次のP波の始まり）","QRSの頂点を結んだ線","T波の頂点","用紙の一番下の線"],"STの高さなどは、この基線と比べて判断します。"],
+ ["大マス5つ分の横幅は何秒？",["1秒","0.2秒","5秒","0.5秒"],"大マス1つ0.2秒×5＝1秒。"],
+ ["縦の10mm（大マス2つ）は何mV？",["1mV","0.1mV","10mV","0.5mV"],"標準感度は10mm/mV。小マス1つは0.1mVです。"],
+ ["PR間隔の測り方として正しいのは？",["P波の始まり〜QRS波の始まり","P波の終わり〜QRS波の始まり","P波の始まり〜R波の頂点","P波の頂点〜QRS波の終わり"],"始まりから始まりまで。正常0.12〜0.20秒。"],
+ ["QT間隔の測り方として正しいのは？",["QRS波の始まり〜T波の終わり","QRS波の終わり〜T波の終わり","P波の始まり〜T波の終わり","R波の頂点〜T波の頂点"],"心室の興奮から回復までの時間です。"],
+ ["ST部分はどこからどこまで？",["QRS波の終わり〜T波の始まり","P波の終わり〜QRS波の始まり","T波の終わり〜次のP波","R波〜S波"],"QRSの終わりの点をJ点といいます。"],
+ ["正常なST部分の高さは？",["基線と同じ","基線より2mm高い","基線より2mm低い","T波の頂点と同じ"],"上昇や低下は虚血のサインになります。"],
+ ["心拍数が速くなるとQT間隔はどうなる？",["短くなる","長くなる","変わらない","消える"],"だから心拍数で補正したQTc で評価することがあります。"],
+ ["一般に頻脈とされる心拍数は？",["100/分を超える","80/分を超える","60/分を超える","150/分を超える"],"正常は60〜100/分。60未満が徐脈です。"],
+ ["RR間隔が大マス2つ。心拍数は？",["150/分","100/分","75/分","300/分"],"300÷2＝150/分。"],
+ ["RR間隔が大マス5つ。心拍数は？",["60/分","50/分","75/分","100/分"],"300÷5＝60/分。"],
+ ["12誘導心電図の内訳として正しいのは？",["四肢誘導6＋胸部誘導6","四肢誘導3＋胸部誘導9","四肢誘導4＋胸部誘導8","すべて胸部誘導"],"四肢：I・II・III・aVR・aVL・aVF、胸部：V1〜V6。"],
+ ["四肢誘導に含まれないものは？",["V1","aVF","III","aVL"],"Vがつくのは胸部誘導です。"],
+ ["病棟モニターでよく使われ、P波が見やすい誘導は？",["II誘導","aVR","V1","I誘導"],"興奮の向きとII誘導の向きがほぼ一致し、P波とQRSが上向きで大きく見えます。"],
+ ["モニター心電図（3点誘導）で右鎖骨下に付ける電極の色は？",["赤","黄","緑","黒"],"赤＝右鎖骨下、黄＝左鎖骨下、緑＝左下胸部が基本の配置です。"],
+ ["正常洞調律のP波として正しいのは？",["各QRSの前に1つずつあり、II誘導で上向き","QRSのあとにある","QRSより大きい","aVRで上向き"],"洞結節から出た興奮なら、この形になります。"],
+ ["電気の流れが電極から遠ざかるとき、波はどう描かれる？",["下向き","上向き","平ら","とがる"],"向かってくると上向き、遠ざかると下向き。"],
+ ["心電図判読で最初に確認するのは？",["心拍数とリズム","ST部分","U波","電極の色"],"速さとRRの規則性で大きく分類してから、P・PR・QRS・STを見ます。"],
+];
+const BASIC=BQ.map((k,i)=>({id:"b"+i,type:"know",q:k[0],ans:k[1][0],opts:k[1],exp:k[2]}));
+
+/* ===================== knowledge questions (original) ===================== */
+const KQ=[
+ ["記録速度25mm/秒の心電図で、小さいマス1つ（1mm）は何秒？",["0.04秒","0.02秒","0.1秒","0.2秒"],"25mm＝1秒なので 1mm＝1/25＝0.04秒。大きいマス（5mm）は0.2秒。"],
+ ["大きいマス（5mm）1つは何秒？",["0.2秒","0.04秒","0.5秒","1秒"],"0.04秒×5＝0.2秒。大きいマス5つで1秒。"],
+ ["RR間隔が大きいマス4つのとき、心拍数はおよそ？",["75/分","60/分","100/分","50/分"],"心拍数＝300÷大きいマスの数。300÷4＝75/分。"],
+ ["RR間隔が小さいマス15個のとき、心拍数は？",["100/分","75/分","150/分","60/分"],"心拍数＝1500÷小さいマスの数。1500÷15＝100/分。"],
+ ["標準の校正波（キャリブレーション）は？",["1mV＝10mm","1mV＝5mm","1mV＝20mm","0.5mV＝10mm"],"通常は1mVで10mm（大きいマス2つ）の高さ。"],
+ ["正常なPR間隔は？",["0.12〜0.20秒","0.06〜0.10秒","0.20〜0.30秒","0.30秒以上"],"小さいマス3〜5個分。0.20秒を超えると1度房室ブロック、0.12秒未満はWPWなどを考える。"],
+ ["正常なQRS幅の目安は？",["0.10秒以下","0.12〜0.16秒","0.20秒以上","0.04秒以下"],"0.12秒以上は幅広QRS。脚ブロックや心室性の興奮を疑う。"],
+ ["刺激伝導系の正しい順序は？",["洞結節→房室結節→ヒス束→脚→プルキンエ線維","房室結節→洞結節→ヒス束→脚→プルキンエ線維","洞結節→ヒス束→房室結節→脚→プルキンエ線維","洞結節→房室結節→脚→ヒス束→プルキンエ線維"],"上から下へ。洞結節が最も自動能が高く、ペースメーカーになる。"],
+ ["房室接合部からの補充調律の心拍数の目安は？",["40〜60/分","60〜100/分","20〜40/分","100〜150/分"],"洞結節60〜100、房室接合部40〜60、心室20〜40。下位ほど遅い。"],
+ ["正常洞調律でP波が陰性になる誘導は？",["aVR","II","aVF","V5"],"興奮は右上から左下へ向かうため、右上から見るaVRではP波もQRSも陰性になる。"],
+ ["下壁を反映する誘導の組み合わせは？",["II・III・aVF","I・aVL・V5・V6","V1・V2","V3・V4"],"II・III・aVFは下から心臓を見る誘導。右冠動脈の閉塞で変化が出やすい。"],
+ ["側壁を反映する誘導は？",["I・aVL・V5・V6","II・III・aVF","V1・V2","aVR"],"左側から見る誘導。左回旋枝の領域。"],
+ ["V1電極を付ける位置は？",["第4肋間胸骨右縁","第4肋間胸骨左縁","第5肋間左鎖骨中線","第5肋間左前腋窩線"],"V1：第4肋間胸骨右縁、V2：第4肋間胸骨左縁、V4：第5肋間左鎖骨中線、V3はV2とV4の中間。"],
+ ["四肢電極の色で、左手に付けるのは？",["黄","赤","緑","黒"],"右手＝赤、左手＝黄、左足＝緑、右足＝黒。"],
+ ["PR間隔が徐々に延長し、QRSが1つ脱落するのは？",["ウェンケバッハ型2度房室ブロック","モビッツII型2度房室ブロック","1度房室ブロック","3度房室ブロック"],"延びて延びて抜ける。抜けた後はPRが短く戻る。"],
+ ["ペースメーカー適応になりやすい房室ブロックの組み合わせは？",["モビッツII型と3度","1度とウェンケバッハ型","1度のみ","ウェンケバッハ型のみ"],"ヒス束以下の障害が多く、突然の徐脈・失神につながるため。"],
+ ["PVC前後のRR間隔の和が、基本RR間隔のちょうど2倍になる現象は？",["代償性休止","非代償性休止","補充収縮","房室解離"],"洞結節のリズムがリセットされないため。PACでは通常2倍未満（非代償性）。"],
+ ["心室細動を発見したときに最優先する対応は？",["胸骨圧迫と除細動","12誘導心電図の記録","抗不整脈薬の内服","経過観察"],"VFは心停止。応援要請、CPR、AED/除細動器をただちに。"],
+ ["除細動の適応となるリズムは？",["心室細動と無脈性心室頻拍","心静止とPEA","心房細動（安定）","洞性徐脈"],"心静止・PEAは除細動の適応外で、CPRとアドレナリンが中心。"],
+ ["心房細動の特徴として正しいものは？",["P波が消失しRR間隔が不規則","鋸歯状波が規則的に出る","PR間隔が延長する","QRSが幅広く規則的"],"f波と絶対不整。鋸歯状波は心房粗動。"],
+ ["心房細動で特に注意すべき合併症は？",["脳塞栓（心原性脳梗塞）","低血糖","気胸","高カリウム血症"],"心房内の血流がよどみ血栓ができやすい。抗凝固療法で予防する。"],
+ ["心房粗動のF波の頻度は約？",["300/分","150/分","600/分","100/分"],"2:1伝導なら心室は約150/分、4:1なら約75/分。"],
+ ["高カリウム血症で最初に出やすい変化は？",["テント状T波","U波","デルタ波","ST低下"],"さらに進むとP波平低化、QRS幅拡大、サインカーブ様、心停止へ。"],
+ ["低カリウム血症で見られやすい変化は？",["U波の出現・T波平低化","テント状T波","QT短縮","デルタ波"],"ST低下を伴うことも。ジギタリス中毒や不整脈が起こりやすくなる。"],
+ ["高カルシウム血症で見られる変化は？",["QT短縮","QT延長","テント状T波","デルタ波"],"低カルシウム血症ではST部分が延びてQT延長。"],
+ ["QT延長で起こりやすい危険な不整脈は？",["トルサード・ド・ポアンツ","心房粗動","洞性徐脈","1度房室ブロック"],"QRSの向きがねじれるように変わる多形性VT。VFへ移行しうる。"],
+ ["WPW症候群の心電図所見は？",["PR短縮・デルタ波・QRS幅拡大","PR延長・QRS正常","P波消失・RR不整","ST上昇・異常Q波"],"ケント束を通って心室の一部が早く興奮するため、立ち上がりがなだらかになる。"],
+ ["完全右脚ブロックでV1誘導に見られる形は？",["rsR′型（M字型）","深いS波のみ","デルタ波","テント状T波"],"QRS幅0.12秒以上で完全、未満なら不完全右脚ブロック。"],
+ ["急性心筋梗塞の心電図変化で、最も早期に出やすいのは？",["T波の増高（超急性期T波）","異常Q波","冠性T波","U波"],"T波増高 → ST上昇 → 異常Q波 → 冠性T波（陰性T）の順に変化する。"],
+ ["規則的で細かいギザギザが基線全体に乗るアーチファクトは？",["交流障害（ハム）","筋電図の混入","基線の揺れ（呼吸性変動）","電極はずれ"],"50/60Hzの電源ノイズ。不規則で大きさがまちまちなら筋電図ノイズを考える。"],
+ ["幅の狭いQRSが160/分で規則正しく、P波が見えない。最も考えやすいのは？",["発作性上室頻拍","心室頻拍","心房細動","洞性徐脈"],"迷走神経刺激やATP静注で停止を試みることが多い。"],
+ ["P波とQRS波が無関係に、それぞれ一定の間隔で出ている。これは？",["3度房室ブロック","1度房室ブロック","心房細動","洞性頻脈"],"房室解離。心室は補充調律で遅く、失神の危険がある。"],
+];
+const KNOW=KQ.map((k,i)=>({id:"k"+i,type:"know",q:k[0],ans:k[1][0],opts:k[1],exp:k[2]}));
+
+/* ===================== cards ===================== */
+const BASE_CARDS=[
+ ["心電図の横軸と縦軸","横＝時間\n縦＝電気の大きさ（電位）"],
+ ["P波","心房の興奮"],["QRS波","心室の興奮（脱分極）"],["T波","心室の回復（再分極）"],
+ ["Q・R・Sの名前","Q：最初の下向き\nR：最初の上向き\nS：Rのあとの下向き"],
+ ["刺激伝導系の順番","洞結節 → 房室結節 → ヒス束\n→ 右脚・左脚 → プルキンエ線維"],
+ ["ペースメーカー","洞結節（右心房）\n60〜100回/分"],
+ ["PR間隔の測り方","P波の始まり〜QRS波の始まり"],
+ ["QT間隔の測り方","QRS波の始まり〜T波の終わり"],
+ ["ST部分","QRSの終わり〜T波の始まり\n正常は基線と同じ高さ"],
+ ["波の向きのルール","電極に向かってくる → 上向き\n遠ざかる → 下向き"],
+ ["正常洞調律の5条件","P波がII誘導で上向き\nPのあとに必ずQRS\nPR 0.12〜0.20秒\nQRS 0.10秒以下\nRR一定・60〜100/分"],
+ ["判読の5ステップ","① 心拍数\n② リズム（RR）\n③ P波\n④ PR・QRS幅\n⑤ ST・T"],
+ ["12誘導の内訳","四肢誘導6：I・II・III・aVR・aVL・aVF\n胸部誘導6：V1〜V6"],
+ ["モニター3点電極","赤：右鎖骨下\n黄：左鎖骨下\n緑：左下胸部"],
+ ["1mm（小マス）","0.04秒 / 0.1mV"],["5mm（大マス）","0.2秒 / 0.5mV"],
+ ["心拍数の簡易計算","300 ÷ RR間の大マス数\n1500 ÷ RR間の小マス数"],
+ ["正常PR間隔","0.12〜0.20秒（小マス3〜5個）"],["正常QRS幅","0.10秒以下（0.12秒以上で幅広）"],
+ ["補充調律の心拍数","房室接合部 40〜60/分\n心室 20〜40/分"],
+ ["四肢電極の色","右手 赤 / 左手 黄\n左足 緑 / 右足 黒"],
+ ["胸部誘導の位置","V1 第4肋間胸骨右縁\nV2 第4肋間胸骨左縁\nV4 第5肋間鎖骨中線\nV3 V2とV4の中間\nV5 V4の高さ前腋窩線\nV6 V4の高さ中腋窩線"],
+ ["下壁 / 側壁 / 前壁中隔の誘導","下壁 II・III・aVF\n側壁 I・aVL・V5・V6\n前壁中隔 V1〜V4"],
+ ["AFとAFLの違い","AF：P波なし、f波、RR絶対不整\nAFL：鋸歯状F波約300/分、伝導比は一定"],
+ ["PVCの3つの特徴","① 先行P波がない\n② 幅広く変形したQRS\n③ 代償性休止"],
+ ["要注意のPVC","多源性 / 連発（2連・3連以上）\nR on T / 頻発"],
+ ["房室ブロックの見分け方","1度：PR>0.20秒で一定\nウェンケバッハ：PR徐々に延長→脱落\nモビッツII：PR一定のまま突然脱落\n3度：PとQRSが無関係"],
+ ["除細動の適応","心室細動・無脈性心室頻拍\n（心静止・PEAは適応外）"],
+ ["高K血症の進行","テント状T → P波平低 → QRS幅拡大 → サインカーブ → 心停止"],
+ ["低K血症","T波平低・U波・ST低下"],["カルシウム異常","高Ca：QT短縮\n低Ca：QT延長"],
+ ["心筋梗塞の経時変化","T波増高 → ST上昇 → 異常Q波 → 冠性T波"],
+ ["WPW症候群の3徴","PR短縮・デルタ波・QRS幅拡大"],
+ ["アーチファクト","交流障害：規則的で細かい\n筋電図：不規則・大小まちまち\n基線動揺：ゆっくり上下"],
+];
+
+/* ===================== router ===================== */
+const views=["home","lessons","lesson","quiz","result","cards","lib","my"];
+function show(v){views.forEach(n=>{const el=document.getElementById("v-"+n);el.hidden=n!==v;});window.scrollTo(0,0);if(v==="home")renderHome();}
+document.querySelectorAll("[data-home]").forEach(b=>b.addEventListener("click",()=>show("home")));
+document.querySelectorAll("[data-go]").forEach(b=>b.addEventListener("click",()=>{const m=b.dataset.go;
+  if(m==="lessons"){renderLessonIndex();show("lessons");}
+  else if(m==="wave"||m==="know"||m==="weak"||m==="base")startQuiz(m); else if(m==="cards")startCards(); else if(m==="lib"){renderLib();show("lib");} else {renderMy();show("my");}}));
+
+function weakIds(){return Object.entries(S.q).filter(([,r])=>r.w>0&&r.w>=r.c).map(([id])=>id);}
+function renderHome(){
+  S.days=S.days||{};const td=S.days[today()]||0;
+  let c=0,w=0;Object.values(S.q).forEach(r=>{c+=r.c;w+=r.w;});
+  document.getElementById("sToday").textContent=td;
+  document.getElementById("sRate").textContent=c+w?Math.round(100*c/(c+w))+"%":"–";
+  document.getElementById("sWeak").textContent=weakIds().length;
+  S.lessons=S.lessons||{};
+  document.getElementById("cLes").textContent=Object.keys(S.lessons).length+" / "+LESSONS.length;
+  document.getElementById("cBase").textContent=BASIC.length+"問";
+  document.getElementById("cWave").textContent=RHYTHMS.length+"種";
+  document.getElementById("cKnow").textContent=KNOW.length+"問";
+  document.getElementById("cWeak").textContent=weakIds().length+"問";
+  document.getElementById("cCards").textContent=(BASE_CARDS.length+S.my.length)+"枚";
+  document.getElementById("cLib").textContent=RHYTHMS.length+"種";
+  document.getElementById("cMy").textContent=S.my.length+"枚";
+  requestAnimationFrame(()=>drawStrip(document.getElementById("heroStrip"),"nsr"));
+}
+
+/* ===================== quiz ===================== */
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+function waveItem(id){const r=R[id];return{id:"w_"+id,type:"wave",rid:id,q:"この波形の判読として最も適切なものは？",ans:r.name,opts:[r.name,...r.conf.map(x=>R[x].name)],pts:r.pts};}
+function itemById(id){if(id.startsWith("w_"))return waveItem(id.slice(2));return KNOW.find(k=>k.id===id)||BASIC.find(k=>k.id===id);}
+let Q={mode:"",list:[],i:0,score:0};
+function startQuiz(mode){
+  let pool;
+  if(mode==="wave")pool=shuffle(RHYTHMS.map(r=>waveItem(r.id)));
+  else if(mode==="base")pool=shuffle(BASIC).sort((a,b)=>(S.q[a.id]?.c||0)-(S.q[b.id]?.c||0));
+  else if(mode==="know")pool=shuffle(KNOW).sort((a,b)=>((S.q[a.id]?.c||0)-(S.q[b.id]?.c||0))*0.5);
+  else{pool=shuffle(weakIds().map(itemById).filter(Boolean)); if(pool.length<5)pool=pool.concat(shuffle([...KNOW,...RHYTHMS.map(r=>waveItem(r.id))]).filter(x=>!pool.find(p=>p.id===x.id)).slice(0,5-pool.length));}
+  Q={mode,list:pool.slice(0,5),i:0,score:0};show("quiz");renderQ();
+}
+function renderQ(){
+  const it=Q.list[Q.i];
+  document.getElementById("qCount").textContent=(Q.i+1)+" / "+Q.list.length;
+  document.getElementById("qBar").style.width=(Q.i/Q.list.length*100)+"%";
+  const box=document.getElementById("qStripBox");box.hidden=it.type!=="wave";
+  if(it.type==="wave")requestAnimationFrame(()=>drawStrip(document.getElementById("qStrip"),it.rid));
+  document.getElementById("qText").textContent=it.q;
+  const opts=document.getElementById("qOpts");opts.innerHTML="";
+  shuffle(it.opts).forEach(o=>{const b=document.createElement("button");b.className="opt";b.textContent=o;b.onclick=()=>answer(it,o,b);opts.appendChild(b);});
+  document.getElementById("qExplain").hidden=true;document.getElementById("qNext").hidden=true;
+}
+document.getElementById("redraw").onclick=()=>{const it=Q.list[Q.i];if(it.type==="wave")drawStrip(document.getElementById("qStrip"),it.rid);};
+function answer(it,o,btn){
+  const ok=o===it.ans;
+  document.querySelectorAll("#qOpts .opt").forEach(b=>{b.disabled=true;if(b.textContent===it.ans)b.classList.add("ok");});
+  if(!ok)btn.classList.add("ng");
+  const r=S.q[it.id]||{c:0,w:0};ok?r.c++:r.w++;S.q[it.id]=r;S.days[today()]=(S.days[today()]||0)+1;save();
+  if(ok)Q.score++;
+  const ex=document.getElementById("qExplain");
+  const body=it.type==="wave"?"<ul>"+it.pts.map(p=>"<li>"+p+"</li>").join("")+"</ul>":"<div>"+it.exp+"</div>";
+  ex.innerHTML='<div class="verdict '+(ok?"ok":"ng")+'">'+(ok?"正解":"不正解：正解は「"+it.ans+"」")+"</div>"+body;
+  ex.hidden=false;const nx=document.getElementById("qNext");nx.hidden=false;nx.textContent=Q.i===Q.list.length-1?"結果を見る":"次へ";nx.focus();
+}
+document.getElementById("qNext").onclick=()=>{Q.i++;if(Q.i<Q.list.length)renderQ();else{
+  document.getElementById("rScore").textContent=Q.score;document.getElementById("rTotal").textContent=Q.list.length;
+  document.getElementById("rMsg").textContent=Q.score===Q.list.length?"全問正解。この調子で続けましょう。":Q.score>=3?"あと少し。まちがえた問題は「苦手だけ復習」に入りました。":"解説を読み返してから、もう一度挑戦してみましょう。";
+  show("result");}};
+document.getElementById("rAgain").onclick=()=>startQuiz(Q.mode);
+
+/* ===================== lessons ===================== */
+let LI=0;
+function renderLessonIndex(){
+  const L=document.getElementById("lesList");L.innerHTML="";
+  LESSONS.forEach((les,i)=>{const b=document.createElement("button");b.className="mode";
+    b.innerHTML='<span class="ic"><span class="num">'+(i+1)+'</span></span><span><strong></strong></span><span class="done">'+(S.lessons[i]?"済":"")+'</span>';
+    b.querySelector("strong").textContent=les.t;b.onclick=()=>{LI=i;show("lesson");renderLesson();};L.appendChild(b);});
+}
+function renderLesson(){
+  const les=LESSONS[LI];
+  document.getElementById("lPos").textContent=(LI+1)+" / "+LESSONS.length;
+  document.getElementById("lBar").style.width=((LI+1)/LESSONS.length*100)+"%";
+  document.getElementById("lEyebrow").textContent="LESSON "+(LI+1);
+  document.getElementById("lTitle").textContent=les.t;
+  const fig=document.getElementById("lFig");fig.innerHTML="";fig.hidden=!les.fig;
+  if(les.fig==="svg:cond")fig.innerHTML=COND_SVG;
+  else if(les.fig){const cv=document.createElement("canvas");cv.className="strip";cv.setAttribute("role","img");cv.setAttribute("aria-label",les.t+"の図");fig.appendChild(cv);requestAnimationFrame(()=>drawBeat(cv,les.fig.slice(5)));}
+  document.getElementById("lBody").innerHTML=les.body;
+  document.getElementById("lQ").textContent=les.q[0];
+  const opts=document.getElementById("lOpts");opts.innerHTML="";
+  shuffle(les.q[1]).forEach(o=>{const b=document.createElement("button");b.className="opt";b.textContent=o;b.onclick=()=>{
+    const ok=o===les.q[1][0];opts.querySelectorAll(".opt").forEach(x=>{x.disabled=true;if(x.textContent===les.q[1][0])x.classList.add("ok");});
+    if(!ok)b.classList.add("ng");else{S.lessons[LI]=1;S.days[today()]=(S.days[today()]||0)+1;save();}
+    const ex=document.getElementById("lExp");ex.innerHTML='<div class="verdict '+(ok?"ok":"ng")+'">'+(ok?"正解":"正解は「"+les.q[1][0]+"」")+'</div><div></div>';ex.lastChild.textContent=les.q[2];ex.hidden=false;};opts.appendChild(b);});
+  document.getElementById("lExp").hidden=true;
+  document.getElementById("lPrev").disabled=LI===0;
+  document.getElementById("lNext").textContent=LI===LESSONS.length-1?"基礎クイズへ":"次のレッスン";
+  window.scrollTo(0,0);
+}
+document.getElementById("lPrev").onclick=()=>{if(LI>0){LI--;renderLesson();}};
+document.getElementById("lNext").onclick=()=>{if(LI<LESSONS.length-1){LI++;renderLesson();}else startQuiz("base");};
+document.getElementById("lesBack").onclick=()=>{renderLessonIndex();show("lessons");};
+
+/* ===================== cards ===================== */
+let C={deck:[],i:0,flipped:false};
+function startCards(){
+  const all=[...BASE_CARDS.map((c,i)=>({id:"c"+i,f:c[0],b:c[1],tag:"基本カード"})),...S.my.map((c,i)=>({id:"m"+c.id,f:c.f,b:c.b,tag:"自分のカード"}))];
+  C={deck:shuffle(all).sort((a,b)=>(S.cards[a.id]||0)-(S.cards[b.id]||0)).slice(0,10),i:0,flipped:false};show("cards");renderCard();
+}
+function renderCard(){
+  if(C.i>=C.deck.length){show("home");return;}
+  const k=C.deck[C.i];
+  document.getElementById("cPos").textContent=(C.i+1)+" / "+C.deck.length;
+  document.getElementById("cTag").textContent=k.tag;
+  document.getElementById("cFront").textContent=k.f;
+  const b=document.getElementById("cBack");b.textContent=k.b;b.hidden=true;
+  document.getElementById("cHint").textContent="タップで答え";C.flipped=false;
+}
+function flip(){C.flipped=!C.flipped;document.getElementById("cBack").hidden=!C.flipped;document.getElementById("cHint").textContent=C.flipped?"タップで問いに戻る":"タップで答え";}
+const cardEl=document.getElementById("card");cardEl.onclick=flip;cardEl.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();flip();}};
+document.getElementById("cGot").onclick=()=>{const k=C.deck[C.i];S.cards[k.id]=(S.cards[k.id]||0)+1;S.days[today()]=(S.days[today()]||0)+1;save();C.i++;renderCard();};
+document.getElementById("cAgain").onclick=()=>{const k=C.deck[C.i];S.cards[k.id]=0;save();C.deck.push(k);C.i++;renderCard();};
+
+/* ===================== library ===================== */
+function renderLib(){
+  const L=document.getElementById("libList");L.innerHTML="";
+  RHYTHMS.forEach(r=>{const d=document.createElement("details");
+    d.innerHTML='<summary><span>'+r.name+'</span><span class="tag">'+r.tag+'</span></summary><canvas class="strip" role="img" aria-label="'+r.name+'の波形"></canvas><ul>'+r.pts.map(p=>"<li>"+p+"</li>").join("")+'</ul>';
+    d.addEventListener("toggle",()=>{if(d.open)drawStrip(d.querySelector("canvas"),r.id);});L.appendChild(d);});
+}
+
+/* ===================== my cards ===================== */
+function renderMy(){
+  const L=document.getElementById("myList");L.innerHTML="";
+  if(!S.my.length){L.innerHTML='<span class="note">まだありません。本を読んでいて覚えたいことを、自分の言葉で1行ずつ追加しましょう。</span>';return;}
+  S.my.forEach(c=>{const row=document.createElement("div");const s=document.createElement("span");s.textContent=c.f;const del=document.createElement("button");del.textContent="削除";
+    del.onclick=()=>{S.my=S.my.filter(x=>x.id!==c.id);save();renderMy();};row.append(s,del);L.appendChild(row);});
+}
+document.getElementById("myForm").addEventListener("submit",e=>{e.preventDefault();
+  const f=document.getElementById("myFront").value.trim(),b=document.getElementById("myBack").value.trim();if(!f||!b)return;
+  S.my.push({id:Date.now(),f,b});save();e.target.reset();const t=document.getElementById("myToast");t.hidden=false;setTimeout(()=>t.hidden=true,2500);renderMy();});
+
+let rz;window.addEventListener("resize",()=>{clearTimeout(rz);rz=setTimeout(()=>{if(!document.getElementById("v-home").hidden)drawStrip(document.getElementById("heroStrip"),"nsr");},200);});
+show("home");
+</script>
+
+<script>
+if("serviceWorker" in navigator){window.addEventListener("load",()=>{navigator.serviceWorker.register("./sw.js").catch(()=>{});});}
+</script>
+</body>
+</html>
