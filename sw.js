@@ -1,12 +1,12 @@
 // 更新したら数字を上げる（古いキャッシュが消えて新しい版に入れ替わります）
-const CACHE = "ecg3drill-v2";
+const CACHE = "ecg3drill-v8";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./icons/icon-192.png",
-  "./icons/icon-512.png",
-  "./icons/apple-touch-icon.png"
+  "./icon-192.png",
+  "./icon-512.png",
+  "./apple-touch-icon.png"
 ];
 
 self.addEventListener("install", e => {
